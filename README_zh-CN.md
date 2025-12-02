@@ -36,6 +36,12 @@
 -   **高质量输出**: 将最终图像以 16 位 TIFF 文件保存。
 -   **技术栈**: 使用 `rawpy` 进行 RAW 解码，并利用 `colour-science` 进行高精度色彩转换。
 
+### 效果示例
+
+| RAW (线性预览) | Log 空间 (V-Log) | 最终效果 (FujiFilm Class-Neg) |
+| :---: | :---: | :---: |
+| ![RAW](Samples/RAW.jpeg) | ![V-Log](Samples/V-Log.jpeg) | ![Class-Neg](Samples/FujiFilm%20Class-Neg.jpeg) |
+
 ### 安装
 
 安装 Raw Alchemy：

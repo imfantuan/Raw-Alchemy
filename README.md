@@ -36,6 +36,12 @@ This tool follows these precise color conversion steps:
 -   **High Quality Output**: Saves the final image as a 16-bit TIFF file.
 -   **Tech Stack**: Uses `rawpy` for RAW decoding and utilizes `colour-science` for high-precision color transformations.
 
+### Samples
+
+| RAW (Linear Preview) | Log Space (V-Log) | Final Look (FujiFilm Class-Neg) |
+| :---: | :---: | :---: |
+| ![RAW](Samples/RAW.jpeg) | ![V-Log](Samples/V-Log.jpeg) | ![Class-Neg](Samples/FujiFilm%20Class-Neg.jpeg) |
+
 ### Installation
 
 Install Raw Alchemy:
