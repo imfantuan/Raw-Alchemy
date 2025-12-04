@@ -17,6 +17,7 @@ def apply_lens_correction(
     correct_distortion: bool = True,
     correct_tca: bool = True,
     correct_vignetting: bool = True,
+    custom_db_path: Optional[str] = None,
     logger: callable = print,
 ) -> np.ndarray:
     """
@@ -75,6 +76,7 @@ def apply_lens_correction(
             correct_distortion=correct_distortion,
             correct_tca=correct_tca,
             correct_vignetting=correct_vignetting,
+            custom_db_path=custom_db_path,
             logger=logger,
         )
         return corrected

@@ -237,7 +237,7 @@ if _lensfun:
 class LensfunDatabase:
     """Lensfun数据库包装器"""
     
-    def __init__(self, logger: callable = print):
+    def __init__(self, custom_db_path: Optional[str] = None, logger: callable = print):
         if not _lensfun:
             raise RuntimeError("Lensfun library not loaded")
         self.db = _lensfun.lf_db_create()
@@ -264,6 +264,14 @@ class LensfunDatabase:
                 error_msg += f"\n     - Check if the path is correct: {db_path if os.path.isdir(db_path) else 'System paths'}"
                 error_msg += "\n     - Ensure file permissions are correct."
             raise RuntimeError(error_msg)
+
+        # 加载用户自定义数据库
+        if custom_db_path and os.path.exists(custom_db_path):
+            logger(f"  ✨ [Lensfun] Loading custom database from: {custom_db_path}")
+            # lf_db_load_path可以被多次调用以加载更多数据
+            result = _lensfun.lf_db_load_path(self.db, custom_db_path.encode('utf-8'))
+            if result != 0:
+                logger(f"  ⚠️ [Lensfun] Failed to load custom database file: {custom_db_path}, error code: {result}")
     
     def __del__(self):
         if hasattr(self, 'db') and self.db:
@@ -395,6 +403,7 @@ def apply_lens_correction(
     correct_tca: bool = True,
     correct_vignetting: bool = True,
     distance: float = 1000.0,
+    custom_db_path: Optional[str] = None,
     logger: callable = print,
 ) -> np.ndarray:
     """应用镜头校正到图像
@@ -430,7 +439,7 @@ def apply_lens_correction(
     height, width = image.shape[:2]
     
     # 创建数据库并查找相机和镜头
-    db = LensfunDatabase(logger=logger)
+    db = LensfunDatabase(custom_db_path=custom_db_path, logger=logger)
     camera = db.find_camera(camera_maker, camera_model)
     lens = db.find_lens(camera, lens_maker, lens_model)
     

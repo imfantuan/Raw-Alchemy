@@ -52,6 +52,7 @@ def process_image(
     exposure: Optional[float] = None, # 如果是 None 则自动，如果是数字则手动
     lens_correct: bool = True,
     metering_mode: str = 'hybrid',
+    custom_db_path: Optional[str] = None,
     log_queue: Optional[object] = None, # 用于多进程日志记录
 ):
     import os
@@ -116,7 +117,7 @@ def process_image(
     # --- Step 3: 镜头校正 ---
     if lens_correct:
         _log("  🔹 [Step 3] Applying Lens Correction...")
-        img_exposed = utils.apply_lens_correction(img_exposed, raw_path, logger=_log)
+        img_exposed = utils.apply_lens_correction(img_exposed, raw_path, custom_db_path=custom_db_path, logger=_log)
 
 
     # 经验值：饱和度 1.15 ~ 1.25，对比度 1.0 ~ 1.1

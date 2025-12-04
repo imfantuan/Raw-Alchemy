@@ -35,12 +35,18 @@ SUPPORTED_RAW_EXTENSIONS = [
     help="Enable or disable lens distortion correction. Enabled by default.",
 )
 @click.option(
+    "--custom-lensfun-db",
+    "custom_lensfun_db_path",
+    type=click.Path(exists=True),
+    help="Path to a custom lensfun database XML file.",
+)
+@click.option(
     "--metering",
     default="hybrid",
     type=click.Choice(core.METERING_MODES, case_sensitive=False),
     help="Auto exposure metering mode: hybrid (default), average, center-weighted, highlight-safe.",
 )
-def main(input_path, output_path, log_space, lut_path, exposure, lens_correct, metering):
+def main(input_path, output_path, log_space, lut_path, exposure, lens_correct, custom_lensfun_db_path, metering):
     """
     Converts RAW image(s) to TIFF files through an ACES-based pipeline.
 
@@ -85,6 +91,7 @@ def main(input_path, output_path, log_space, lut_path, exposure, lens_correct, m
                     lut_path=lut_path,
                     exposure=exposure,
                     lens_correct=lens_correct,
+                    custom_db_path=custom_lensfun_db_path,
                     metering_mode=metering
                 )
             except Exception as e:
@@ -109,6 +116,7 @@ def main(input_path, output_path, log_space, lut_path, exposure, lens_correct, m
             lut_path=lut_path,
             exposure=exposure,
             lens_correct=lens_correct,
+            custom_db_path=custom_lensfun_db_path,
             metering_mode=metering
         )
 

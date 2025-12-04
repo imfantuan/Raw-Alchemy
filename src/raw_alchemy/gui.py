@@ -94,6 +94,15 @@ class GuiApplication(tk.Frame):
         self.browse_lut_btn = ttk.Button(settings_frame, text="Browse...", command=self.browse_lut)
         self.browse_lut_btn.grid(row=1, column=2, padx=5, pady=5)
 
+        # Custom Lensfun DB
+        self.lensfun_db_label = ttk.Label(settings_frame, text="Custom Lensfun DB (XML):")
+        self.lensfun_db_label.grid(row=2, column=0, padx=5, pady=5, sticky="w")
+        self.custom_lensfun_db_path_var = tk.StringVar()
+        self.lensfun_db_entry = ttk.Entry(settings_frame, textvariable=self.custom_lensfun_db_path_var, width=60)
+        self.lensfun_db_entry.grid(row=2, column=1, padx=5, pady=5, sticky="ew")
+        self.browse_lensfun_db_btn = ttk.Button(settings_frame, text="Browse...", command=self.browse_lensfun_db)
+        self.browse_lensfun_db_btn.grid(row=2, column=2, padx=5, pady=5)
+
         settings_frame.columnconfigure(1, weight=1)
 
         # --- Frame for Exposure Settings ---
@@ -191,6 +200,11 @@ class GuiApplication(tk.Frame):
         if path:
             self.lut_path_var.set(path)
 
+    def browse_lensfun_db(self):
+        path = filedialog.askopenfilename(filetypes=[("XML files", "*.xml"), ("All files", "*.*")])
+        if path:
+            self.custom_lensfun_db_path_var.set(path)
+
     def log(self, message):
         self.log_queue.put(message)
 
@@ -231,6 +245,7 @@ class GuiApplication(tk.Frame):
         output_path = self.output_path_var.get()
         log_space = self.log_space_var.get()
         lut_path = self.lut_path_var.get() or None
+        custom_lensfun_db_path = self.custom_lensfun_db_path_var.get() or None
         
         # Get exposure settings from UI
         exposure_mode = self.exposure_mode_var.get()
@@ -250,6 +265,7 @@ class GuiApplication(tk.Frame):
         self.log(f"  Input: {input_path}")
         self.log(f"  Output: {output_path}")
         self.log(f"  Settings: Log={log_space}, LUT={lut_path or 'None'}, Exposure={exposure_mode}")
+        self.log(f"  Custom Lensfun DB: {custom_lensfun_db_path or 'Default'}")
         if exposure_mode == "Auto":
             self.log(f"    Metering Mode: {metering_mode}")
         else:
@@ -287,6 +303,7 @@ class GuiApplication(tk.Frame):
                             lut_path=lut_path,
                             exposure=exposure_val,
                             lens_correct=True,
+                            custom_db_path=custom_lensfun_db_path,
                             metering_mode=metering_mode,
                             log_queue=log_queue
                         ): filename for filename in raw_files
@@ -317,6 +334,7 @@ class GuiApplication(tk.Frame):
                     lut_path=lut_path,
                     exposure=exposure_val,
                     lens_correct=True,
+                    custom_db_path=custom_lensfun_db_path,
                     metering_mode=metering_mode,
                     log_queue=log_queue
                 )
