@@ -1,5 +1,5 @@
 from typing import Optional
-import exifread
+import rawpy
 import numpy as np
 import colour
 from . import lensfun_wrapper as lf
@@ -281,12 +281,12 @@ def auto_expose_hybrid(img_linear: np.ndarray, source_colorspace, target_gray: f
 
 # ----------------- 镜头校正 (保持逻辑，优化注释) -----------------
 
-def apply_lens_correction(image: np.ndarray, raw_path: str, custom_db_path: Optional[str] = None, logger: callable = print, **kwargs) -> np.ndarray:
+def apply_lens_correction(image: np.ndarray, exif_data: dict, custom_db_path: Optional[str] = None, logger: callable = print, **kwargs) -> np.ndarray:
     """
     镜头校正通常需要几何变换，很难完全 In-Place。
     这是整个流程中少数几个必然会产生内存拷贝的地方。
     """
-    exif_data = extract_lens_exif(raw_path, logger=logger)
+    # exif_data is now passed directly
     
     # 简单的字典合并
     params = {**exif_data, **kwargs}
@@ -320,32 +320,20 @@ def apply_lens_correction(image: np.ndarray, raw_path: str, custom_db_path: Opti
         logger(f"  ❌ [Lens Error] {e}")
         return image # 失败则返回原图
 
-def extract_lens_exif(raw_path: str, logger: callable = print) -> dict:
-    """(保持不变)"""
+def extract_lens_exif(raw: rawpy.RawPy, logger: callable = print) -> dict:
+    """使用 rawpy 对象从 RAW 文件中提取 EXIF 和镜头信息。"""
     result = {}
     try:
-        with open(raw_path, 'rb') as f:
-            tags = exifread.process_file(f, details=False)
-        
-        # 简单的 helper lambda
-        get_tag = lambda t: str(tags.get(t)).strip() if tags.get(t) else None
-        
-        result['camera_maker'] = get_tag('Image Make')
-        result['camera_model'] = get_tag('Image Model')
-        result['lens_maker'] = get_tag('EXIF LensMake')
-        result['lens_model'] = get_tag('EXIF LensModel')
-        
-        fl = tags.get('EXIF FocalLength')
-        if fl:
-            try: result['focal_length'] = float(eval(str(fl)))
-            except: pass
-            
-        ap = tags.get('EXIF FNumber')
-        if ap:
-            try: result['aperture'] = float(eval(str(ap)))
-            except: pass
+        # 使用新的 rawpy 参数对象 (rawpy >= 0.20.0)
+        result['camera_maker'] = raw.camera_params.make
+        result['camera_model'] = raw.camera_params.model
+        result['lens_maker'] = raw.lens_params.make
+        result['lens_model'] = raw.lens_params.model
+        result['focal_length'] = raw.other_params.focal_len
+        result['aperture'] = raw.other_params.aperture
             
     except Exception as e:
         logger(f"  ❌ [EXIF Error] {e}")
     
-    return result
+    # 过滤掉 None 值，防止下游出错
+    return {k: v for k, v in result.items() if v is not None}

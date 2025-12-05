@@ -72,14 +72,18 @@ def process_image(
     # --- Step 1: 统一解码 (优化内存) ---
     _log(f"  🔹 [Step 1] Decoding RAW...")
     with rawpy.imread(raw_path) as raw:
-        # prophoto_linear 是 uint16
+        # --- Step 1.1: 提取 EXIF ---
+        # 在解码前提取，即使解码失败也能获取信息
+        exif_data = utils.extract_lens_exif(raw, logger=_log)
+
+        # --- Step 1.2: 解码 ---
         prophoto_linear = raw.postprocess(
             gamma=(1, 1),
             no_auto_bright=True,
             use_camera_wb=True,
             output_bps=16,
-            output_color=rawpy.ColorSpace.ProPhoto, 
-            bright=1.0, 
+            output_color=rawpy.ColorSpace.ProPhoto,
+            bright=1.0,
             highlight_mode=2,
             demosaic_algorithm=rawpy.DemosaicAlgorithm.AAHD,
         )
@@ -87,7 +91,6 @@ def process_image(
         del prophoto_linear # <--- 关键：立即释放巨大的 uint16 数组
         gc.collect()        # <--- 强制回收
 
-        
     source_cs = colour.RGB_COLOURSPACES['ProPhoto RGB']
 
     # --- Step 2: 曝光控制 (二选一) ---
@@ -100,7 +103,7 @@ def process_image(
         gain = 2.0 ** exposure
         
         # 应用增益
-        img *= gain
+        utils.apply_gain_inplace(img, gain)
 
     else:
         # === 路径 B: 自动测光 ===
@@ -120,7 +123,12 @@ def process_image(
     # --- Step 3: 镜头校正 ---
     if lens_correct:
         _log("  🔹 [Step 3] Applying Lens Correction...")
-        img = utils.apply_lens_correction(img, raw_path, custom_db_path=custom_db_path, logger=_log)
+        img = utils.apply_lens_correction(
+            img,
+            exif_data=exif_data,
+            custom_db_path=custom_db_path,
+            logger=_log
+        )
 
 
     # 经验值：饱和度 1.15 ~ 1.25，对比度 1.0 ~ 1.1
