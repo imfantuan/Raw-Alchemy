@@ -234,6 +234,9 @@ if _lensfun:
     _lensfun.lf_free.restype = None
     _lensfun.lf_free.argtypes = [ctypes.c_void_p]
 
+    _lensfun.lf_modifier_get_auto_scale.restype = ctypes.c_float
+    _lensfun.lf_modifier_get_auto_scale.argtypes = [ctypes.POINTER(lfModifier)]
+
 
 # ============================================================================
 # Python包装类
@@ -360,6 +363,10 @@ class LensfunModifier:
     def enable_scaling(self, scale: float) -> int:
         """启用缩放"""
         return _lensfun.lf_modifier_enable_scaling(self.modifier, scale)
+
+    def get_auto_scale(self) -> float:
+        """获取自动缩放比例"""
+        return _lensfun.lf_modifier_get_auto_scale(self.modifier)
     
     def apply_subpixel_geometry_distortion(self, xu: float, yu: float, 
                                            width: int, height: int) -> Optional[np.ndarray]:
@@ -476,10 +483,14 @@ def apply_lens_correction(
     # 创建修改器
     modifier = LensfunModifier(lens, focal_length, crop_factor, width, height, LF_PF_F32)
     
-    # 启用所需的校正
+    # 启用所需的校正并应用自动缩放
     if correct_distortion:
         modifier.enable_distortion_correction()
-    
+        # 获取并应用自动缩放以消除黑边
+        auto_scale = modifier.get_auto_scale()
+        modifier.enable_scaling(1.0/auto_scale)
+        logger(f"  ⚖️ [Lensfun] Auto-scaling enabled with factor: {auto_scale:.4f}")
+
     if correct_tca:
         modifier.enable_tca_correction()
     
@@ -491,6 +502,7 @@ def apply_lens_correction(
     
     # 步骤1: 应用颜色修改（暗角）
     if correct_vignetting:
+        # Lensfun的颜色修正是原位操作，所以我们需要一个副本
         image_copy = image.copy()
         modifier.apply_color_modification(image_copy, 0.0, 0.0, width, height)
         image = image_copy
@@ -500,25 +512,19 @@ def apply_lens_correction(
         coords = modifier.apply_subpixel_geometry_distortion(0.0, 0.0, width, height)
         
         if coords is not None:
-            # coords shape: (height, width, 3, 2) -> RGB channels, xy coordinates
+            # 使用scipy的map_coordinates进行插值
+            from scipy.ndimage import map_coordinates
+            
             for c in range(3):  # R, G, B
-                # 使用scipy的map_coordinates进行插值
-                from scipy.ndimage import map_coordinates
+                coords_c = coords[:, :, c, :]
+                coordinates = np.array([coords_c[:, :, 1], coords_c[:, :, 0]])
                 
-                # 提取该通道的坐标
-                coords_c = coords[:, :, c, :]  # (h, w, 2)
-                y_coords = coords_c[:, :, 1]
-                x_coords = coords_c[:, :, 0]
-                
-                # map_coordinates需要 (2, h, w) 格式
-                coordinates = np.array([y_coords, x_coords])
-                
-                # 对该通道进行插值
                 output[:, :, c] = map_coordinates(
                     image[:, :, c],
                     coordinates,
-                    order=3,  # 三次插值
-                    mode='reflect'
+                    order=3,
+                    mode='constant',
+                    cval=0.0
                 )
         else:
             output = image
