@@ -28,8 +28,10 @@ jobs:
         env:
           CMAKE_PREFIX_PATH: ''
 
-      - name: Setup UPX
-        uses: sylveon/action-setup-upx@v1
+      - name: Install UPX
+        uses: crazy-max/ghaction-upx@v3
+        with:
+          install-only: true
 
       - name: Build executable with PyInstaller
         run: pyinstaller RawAlchemy.spec
