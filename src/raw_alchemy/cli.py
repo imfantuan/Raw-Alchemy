@@ -63,7 +63,7 @@ def main(input_path, output_path, log_space, lut_path, exposure, lens_correct, c
             custom_db_path=custom_lensfun_db_path,
             metering_mode=metering,
             jobs=jobs,
-            logger_func=print, # Pass the print function for logging
+            logger_func=click.echo, # Use click.echo for robust Unicode support
         )
     except Exception as e:
         # The orchestrator will log specifics, but we can catch fatal errors here.
