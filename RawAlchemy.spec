@@ -5,7 +5,10 @@ import sys
 # Enable strip on Linux and macOS for a smaller executable.
 # On Windows, stripping can sometimes cause issues with antivirus software
 # or runtime behavior, so it's safer to leave it disabled.
-strip_executable = True if sys.platform.startswith('linux') or sys.platform == 'darwin' else False
+# On macOS, stripping the Python shared library can lead to runtime errors,
+# such as "Failed to load Python shared library". Disabling strip for macOS
+# is a safer approach to ensure all necessary symbols are preserved.
+strip_executable = True if sys.platform.startswith('linux') else False
 
 
 a = Analysis(
