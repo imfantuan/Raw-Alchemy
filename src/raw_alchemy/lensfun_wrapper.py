@@ -30,6 +30,7 @@ def _get_base_path():
 def _load_lensfun_library():
     """加载lensfun动态库"""
     system = platform.system()
+    print(f"base path: {base_path}")
     base_path = _get_base_path()
     lensfun_dir = os.path.join(base_path, "vendor", "lensfun")
     lib_dir = os.path.join(lensfun_dir, "lib")
