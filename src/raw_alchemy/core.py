@@ -3,6 +3,9 @@ import rawpy
 import numpy as np
 import colour
 import tifffile
+from PIL import Image
+import pillow_heif
+import os
 from typing import Optional
 
 from . import utils
@@ -192,15 +195,47 @@ def process_image(
             traceback.print_exc()
 
     # --- Step 6: 保存 ---
-    _log(f"  💾 Saving to {output_path}...")
-    # 注意：TIFF 保存时通常需要转 uint16。
-    tifffile.imwrite(
-        output_path, 
-        (img * 65535).astype(np.uint16), # 这里还是会有短暂的内存峰值，但已经是最后一步
-        photometric='rgb'
-    )
+    _log(f"  💾 Preparing to save to {output_path}...")
+    
+    file_ext = os.path.splitext(output_path)[1].lower()
+    output_image_uint16 = None # Initialize
+
+    try:
+        if file_ext in ['.tif', '.tiff']:
+            _log("    Format: TIFF (16-bit, ZLIB compression)")
+            output_image_uint16 = (img * 65535).astype(np.uint16)
+            tifffile.imwrite(
+                output_path,
+                output_image_uint16,
+                photometric='rgb',
+                compression='zlib' # <--- 启用压缩
+            )
+        elif file_ext in ['.heic', '.heif']:
+            _log("    Format: HEIF (10-bit, Lossless)")
+            output_image_uint16 = (img * 65535).astype(np.uint16)
+            # 根据用户反馈，使用 pillow_heif.from_bytes 以获得更直接的控制
+            heif_file = pillow_heif.from_bytes(
+                mode='RGB;16',
+                size=(output_image_uint16.shape[1], output_image_uint16.shape[0]),
+                data=output_image_uint16.tobytes()
+            )
+            heif_file.save(output_path, quality=-1, bit_depth=10)
+        else:
+            # Fallback for common 8-bit formats like JPEG/PNG
+            _log(f"    Format: {file_ext.upper()} (8-bit)")
+            output_image_uint8 = (np.clip(img, 0.0, 1.0) * 255).astype(np.uint8)
+            Image.fromarray(output_image_uint8).save(output_path)
+
+        _log(f"  ✅ Successfully saved to {output_path}")
+
+    except Exception as e:
+        _log(f"  ❌ [Error] Failed to save file: {e}")
+        import traceback
+        traceback.print_exc()
     
     # 显式清理
     del img
+    if output_image_uint16 is not None:
+        del output_image_uint16
     gc.collect()
     _log("  ✅ Done.")

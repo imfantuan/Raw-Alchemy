@@ -45,12 +45,19 @@ from raw_alchemy import core, orchestrator
     default=4,
     help="Number of concurrent jobs for batch processing. Default is 4.",
 )
-def main(input_path, output_path, log_space, lut_path, exposure, lens_correct, custom_lensfun_db_path, metering, jobs):
+@click.option(
+    "--format",
+    "output_format",
+    type=click.Choice(['tif', 'heif', 'jpg'], case_sensitive=False),
+    default='tif',
+    help="Output file format. Default is 'tif'.",
+)
+def main(input_path, output_path, log_space, lut_path, exposure, lens_correct, custom_lensfun_db_path, metering, jobs, output_format):
     """
-    Converts RAW image(s) to TIFF files through an ProPhoto-based pipeline.
+    Converts RAW image(s) to high-quality image files (TIFF, HEIF, or JPG).
 
-    INPUT_PATH: Path to a single RAW file or a directory containing RAW files.
-    OUTPUT_PATH: Path to the output TIFF file or a directory for batch processing.
+    INPUT_PATH: Path to a single RAW file or a directory of RAWs.
+    OUTPUT_PATH: Path to the output file or a directory for batch processing.
     """
     try:
         orchestrator.process_path(
@@ -64,6 +71,7 @@ def main(input_path, output_path, log_space, lut_path, exposure, lens_correct, c
             metering_mode=metering,
             jobs=jobs,
             logger_func=click.echo, # Use click.echo for robust Unicode support
+            output_format=output_format,
         )
     except Exception as e:
         # The orchestrator will log specifics, but we can catch fatal errors here.

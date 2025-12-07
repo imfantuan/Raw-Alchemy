@@ -20,6 +20,8 @@ dependencies = [
     "rawpy @ git+https://github.com/shenmintao/rawpy.git",
     "colour-science @ git+https://github.com/colour-science/colour.git@develop",
     "scipy",
+    "Pillow",
+    "pillow-heif",
     "pyinstaller",
     "numba"
 ]

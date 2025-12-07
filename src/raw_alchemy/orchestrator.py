@@ -18,6 +18,7 @@ def process_path(
     metering_mode,
     jobs,
     logger_func, # A function to handle logging, e.g., print or queue.put
+    output_format: str = 'tif',
 ):
     """
     Orchestrates the processing of a single file or a directory of files.
@@ -31,6 +32,7 @@ def process_path(
             logger_func.put(msg)
         else:
             logger_func(msg)
+    output_ext = f".{output_format}"
     if os.path.isdir(input_path):
         # --- Batch Processing (Parallel) ---
         if not os.path.isdir(output_path):
@@ -53,7 +55,7 @@ def process_path(
                 executor.submit(
                     core.process_image,
                     raw_path=os.path.join(input_path, filename),
-                    output_path=os.path.join(output_path, f"{os.path.splitext(filename)[0]}.tif"),
+                    output_path=os.path.join(output_path, f"{os.path.splitext(filename)[0]}{output_ext}"),
                     log_space=log_space,
                     lut_path=lut_path,
                     exposure=exposure,
@@ -84,7 +86,7 @@ def process_path(
         if os.path.isdir(output_path):
             base_name = os.path.basename(input_path)
             file_name, _ = os.path.splitext(base_name)
-            final_output_path = os.path.join(output_path, f"{file_name}.tif")
+            final_output_path = os.path.join(output_path, f"{file_name}{output_ext}")
         
         log_message("⚙️ Processing single file...")
         core.process_image(

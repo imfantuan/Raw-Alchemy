@@ -45,6 +45,9 @@ class GuiApplication(tk.Frame):
         self.create_widgets()
         self.log_queue = queue.Queue()
         self.master.after(100, self.process_log_queue)
+        
+        # --- Variable Traces ---
+        self.output_format_var.trace_add("write", self.on_output_format_change)
 
     def create_widgets(self):
         # --- Frame for IO ---
@@ -92,27 +95,34 @@ class GuiApplication(tk.Frame):
         self.log_space_menu = ttk.OptionMenu(settings_frame, self.log_space_var, self.log_space_var.get(), *core.LOG_TO_WORKING_SPACE.keys())
         self.log_space_menu.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
 
+        # Output Format
+        self.output_format_label = ttk.Label(settings_frame, text="Output Format:")
+        self.output_format_label.grid(row=1, column=0, padx=5, pady=5, sticky="w")
+        self.output_format_var = tk.StringVar(value='tif')
+        self.output_format_menu = ttk.OptionMenu(settings_frame, self.output_format_var, 'tif', 'tif', 'heif', 'jpg')
+        self.output_format_menu.grid(row=1, column=1, padx=5, pady=5, sticky="ew")
+
         # LUT file
         self.lut_label = ttk.Label(settings_frame, text="LUT File (.cube):")
-        self.lut_label.grid(row=1, column=0, padx=5, pady=5, sticky="w")
+        self.lut_label.grid(row=2, column=0, padx=5, pady=5, sticky="w")
         self.lut_path_var = tk.StringVar()
         self.lut_entry = ttk.Entry(settings_frame, textvariable=self.lut_path_var, width=60)
-        self.lut_entry.grid(row=1, column=1, padx=5, pady=5, sticky="ew")
+        self.lut_entry.grid(row=2, column=1, padx=5, pady=5, sticky="ew")
         self.browse_lut_btn = ttk.Button(settings_frame, text="Browse...", command=self.browse_lut)
-        self.browse_lut_btn.grid(row=1, column=2, padx=5, pady=5)
+        self.browse_lut_btn.grid(row=2, column=2, padx=5, pady=5)
 
         # Custom Lensfun DB
         self.lensfun_db_label = ttk.Label(settings_frame, text="Custom Lensfun DB (XML):")
-        self.lensfun_db_label.grid(row=2, column=0, padx=5, pady=5, sticky="w")
+        self.lensfun_db_label.grid(row=3, column=0, padx=5, pady=5, sticky="w")
         self.custom_lensfun_db_path_var = tk.StringVar()
         self.lensfun_db_entry = ttk.Entry(settings_frame, textvariable=self.custom_lensfun_db_path_var, width=60)
-        self.lensfun_db_entry.grid(row=2, column=1, padx=5, pady=5, sticky="ew")
+        self.lensfun_db_entry.grid(row=3, column=1, padx=5, pady=5, sticky="ew")
         self.browse_lensfun_db_btn = ttk.Button(settings_frame, text="Browse...", command=self.browse_lensfun_db)
-        self.browse_lensfun_db_btn.grid(row=2, column=2, padx=5, pady=5)
+        self.browse_lensfun_db_btn.grid(row=3, column=2, padx=5, pady=5)
 
         # Concurrent Jobs
         self.jobs_label = ttk.Label(settings_frame, text="Concurrent Jobs:")
-        self.jobs_label.grid(row=3, column=0, padx=5, pady=5, sticky="w")
+        self.jobs_label.grid(row=4, column=0, padx=5, pady=5, sticky="w")
         self.jobs_var = tk.IntVar(value=4)
         # Use cpu_count to set a reasonable max, default to 8 if it fails
         try:
@@ -120,7 +130,7 @@ class GuiApplication(tk.Frame):
         except NotImplementedError:
             max_jobs = 8
         self.jobs_spinbox = ttk.Spinbox(settings_frame, from_=1, to=max_jobs, textvariable=self.jobs_var, width=10)
-        self.jobs_spinbox.grid(row=3, column=1, padx=5, pady=5, sticky="w")
+        self.jobs_spinbox.grid(row=4, column=1, padx=5, pady=5, sticky="w")
 
         settings_frame.columnconfigure(1, weight=1)
 
@@ -179,6 +189,10 @@ class GuiApplication(tk.Frame):
         self.start_button = ttk.Button(action_frame, text="Start Processing", command=self.start_processing_thread)
         self.start_button.pack(side="right")
 
+    def on_output_format_change(self, *args):
+        """Callback function to clear the output path when the format changes."""
+        self.output_path_var.set("")
+
     def toggle_exposure_controls(self):
         mode = self.exposure_mode_var.get()
         if mode == "Auto":
@@ -207,7 +221,18 @@ class GuiApplication(tk.Frame):
             self.input_path_var.set(path)
 
     def browse_output_file(self):
-        path = filedialog.asksaveasfilename(defaultextension=".tif", filetypes=[("TIFF files", "*.tif")])
+        output_format = self.output_format_var.get()
+        if output_format == 'tif':
+            filetypes = [("TIFF files", "*.tif")]
+            defaultextension = ".tif"
+        elif output_format == 'heif':
+            filetypes = [("HEIF files", "*.heif"), ("HEIC files", "*.heic")]
+            defaultextension = ".heif"
+        else: # jpg
+            filetypes = [("JPEG files", "*.jpg")]
+            defaultextension = ".jpg"
+
+        path = filedialog.asksaveasfilename(defaultextension=defaultextension, filetypes=filetypes)
         if path:
             self.output_path_var.set(path)
 
@@ -265,6 +290,7 @@ class GuiApplication(tk.Frame):
         input_path = self.input_path_var.get()
         output_path = self.output_path_var.get()
         log_space = self.log_space_var.get()
+        output_format = self.output_format_var.get()
         lut_path = self.lut_path_var.get() or None
         custom_lensfun_db_path = self.custom_lensfun_db_path_var.get() or None
         jobs = self.jobs_var.get()
@@ -286,7 +312,7 @@ class GuiApplication(tk.Frame):
         self.log(f"🎬 Starting processing...")
         self.log(f"  Input: {input_path}")
         self.log(f"  Output: {output_path}")
-        self.log(f"  Settings: Log={log_space}, LUT={lut_path or 'None'}, Exposure={exposure_mode}")
+        self.log(f"  Settings: Log={log_space}, Format={output_format.upper()}, LUT={lut_path or 'None'}, Exposure={exposure_mode}")
         self.log(f"  Custom Lensfun DB: {custom_lensfun_db_path or 'Default'}")
         if exposure_mode == "Auto":
             self.log(f"    Metering Mode: {metering_mode}")
@@ -310,6 +336,7 @@ class GuiApplication(tk.Frame):
                 metering_mode=metering_mode,
                 jobs=jobs,
                 logger_func=self.log_queue, # Pass the queue directly
+                output_format=output_format,
             )
         except Exception as e:
             self.log(f"  ❌ An unexpected error occurred: {e}")
