@@ -58,14 +58,23 @@ def _load_lensfun_library():
                 return ctypes.CDLL("liblensfun.dylib")
             else:
                 return ctypes.CDLL("liblensfun.so")
-    except OSError:
-        return None
+    except OSError as e:
+        error_message = (
+            f"Failed to load the Lensfun library. Tried path: {lib_path} and system defaults.\n"
+            f"Please ensure Lensfun is installed and its location is in the system's library path.\n"
+            f"Original error: {e}"
+        )
+        raise RuntimeError(error_message) from e
 
 
 # 加载库
-_lensfun = _load_lensfun_library()
-if _lensfun is None:
-    print("  ⚠️ [Lensfun] Library not loaded. Lens correction disabled.")
+try:
+    _lensfun = _load_lensfun_library()
+except RuntimeError as e:
+    _lensfun = None
+    # 打印更详细的错误信息
+    print(f"  ⚠️ [Lensfun] Warning: {e}")
+    print("  ⚠️ [Lensfun] Lens correction will be disabled.")
 
 
 # ============================================================================
