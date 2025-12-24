@@ -6,12 +6,8 @@ import queue
 import multiprocessing
 import sys
 
-try:
-    from . import config, orchestrator
-    from .orchestrator import SUPPORTED_RAW_EXTENSIONS
-except ImportError:
-    import config, orchestrator
-    from orchestrator import SUPPORTED_RAW_EXTENSIONS
+from raw_alchemy import config, orchestrator
+from raw_alchemy.orchestrator import SUPPORTED_RAW_EXTENSIONS
 
 
 def resource_path(relative_path):

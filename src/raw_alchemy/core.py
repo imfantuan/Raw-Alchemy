@@ -6,18 +6,12 @@ import os
 from typing import Optional
 
 # 尝试导入同级目录下的模块，如果失败则尝试绝对导入 (方便不同运行环境调试)
-try:
-    from . import utils
-    from .config import LOG_TO_WORKING_SPACE, LOG_ENCODING_MAP
-    from .logger import create_logger
-    from .metering import apply_auto_exposure
-    from .file_io import save_image
-except ImportError:
-    import utils
-    from config import LOG_TO_WORKING_SPACE, LOG_ENCODING_MAP
-    from logger import create_logger
-    from metering import apply_auto_exposure
-    from file_io import save_image
+from raw_alchemy import utils
+from raw_alchemy.config import LOG_TO_WORKING_SPACE, LOG_ENCODING_MAP
+from raw_alchemy.logger import create_logger
+from raw_alchemy.metering import apply_auto_exposure
+from raw_alchemy.file_io import save_image
+
 
 # ==========================================
 #              核心处理函数

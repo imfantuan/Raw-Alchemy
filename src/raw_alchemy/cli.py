@@ -1,11 +1,6 @@
 import click
-try:
-    from . import lensfun_wrapper as lf
-    from . import config, orchestrator
-except ImportError:
-    import lensfun_wrapper as lf
-    import config
-    import orchestrator
+from raw_alchemy import lensfun_wrapper as lf
+from raw_alchemy import config, orchestrator
 
 @click.command()
 @click.argument("input_path", type=click.Path(exists=True))

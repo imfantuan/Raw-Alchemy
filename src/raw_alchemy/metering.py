@@ -9,8 +9,8 @@ try:
     from .logger import Logger
     from . import utils
 except ImportError:
-    from logger import Logger
-    import utils
+    from raw_alchemy.logger import Logger
+    from raw_alchemy import utils
 
 class MeteringStrategy(Protocol):
     """测光策略接口"""

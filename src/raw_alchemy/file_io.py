@@ -8,10 +8,7 @@ import tifffile
 from PIL import Image
 import pillow_heif
 from typing import Optional
-try:
-    from .logger import Logger
-except ImportError:
-    from logger import Logger
+from raw_alchemy.logger import Logger
 
 def save_image(
     img: np.ndarray,
