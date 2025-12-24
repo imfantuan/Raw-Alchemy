@@ -27,7 +27,7 @@ jobs:
           pip install .
         env:
           CMAKE_PREFIX_PATH: ''
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build executable with PyInstaller
         run: pyinstaller RawAlchemy.spec
@@ -55,7 +55,7 @@ jobs:
           python -m pip install --upgrade pip setuptools wheel
           pip install .
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build executable with PyInstaller
         run: pyinstaller RawAlchemy.spec
@@ -102,7 +102,7 @@ jobs:
           python -m pip install --upgrade pip setuptools wheel
           pip install .
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build executable with PyInstaller
         run: pyinstaller RawAlchemy.spec
