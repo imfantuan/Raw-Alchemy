@@ -1,12 +1,21 @@
-# Raw Alchemy
+# 🧪 Raw Alchemy
 
-[English](README.md)
+[English](README.md) | [简体中文](README_zh-CN.md)
+
+> **以数学精度将电影级 LUT 应用于 RAW 照片。**
 
 ---
 
-一个基于 Python 的工具，用于实现高级 RAW 图像处理流程。它旨在将 RAW 文件转换到广色域线性空间 (ProPhoto RGB)，应用相机特定的 Log 曲线，并集成创意 LUT，以实现一个完整且色彩管理精确的工作流。
+## 🔗 相关项目
 
-### 核心理念
+### V-Log Alchemy
+**[V-Log Alchemy](https://github.com/shenmintao/V-Log-Alchemy)** - 一系列专门为 V-Log 色彩空间设计的 `.cube` LUT 文件集合。
+
+这些专业级 LUT（包括富士胶片模拟、徕卡风格、ARRI 色彩科学等）可以直接在 Raw Alchemy 中应用，为您的工作流程实现各种创意风格。非常适合希望将电影级调色带入 RAW 图像的摄影师。
+
+---
+
+## 📖 核心理念
 
 许多摄影师和摄像师都依赖创意 LUT (色彩查找表) 来实现特定的视觉风格。然而，一个普遍的痛点是：**将在视频工作流中表现完美的 LUT 应用于 RAW 格式的照片时，色彩往往会出错。**
 
@@ -21,13 +30,13 @@
 
 通过这个流程，`Raw Alchemy` 打破了 RAW 摄影与专业视频调色之间的壁垒，让摄影师也能享受到电影级别的色彩管理精度。
 
-### 处理流程
+## 🔄 处理流程
 
 本工具遵循以下精确的色彩转换步骤：
 
 `RAW (相机原生)` -> `ProPhoto RGB (线性)` -> `目标 Log 色域 (线性)` -> `目标 Log 曲线 (例如 F-Log2)` -> `(可选) 创意 LUT` -> `16-bit TIFF`
 
-### 特性
+## ✨ 特性
 
 -   **RAW 转 Linear**: 将 RAW 文件直接解码到 ProPhoto RGB (线性) 工作色彩空间。
 -   **Log 转换**: 支持多种相机特定的 Log 格式（F-Log2, S-Log3, LogC4 等）。
@@ -36,13 +45,13 @@
 -   **高质量输出**: 将最终图像以 16 位 TIFF 文件保存。
 -   **技术栈**: 使用 `rawpy` 进行 RAW 解码，并利用 `colour-science` 进行高精度色彩转换。
 
-### 效果示例
+## 📸 效果示例
 
 | RAW (线性预览) | Log 空间 (V-Log) | 最终效果 (FujiFilm Class-Neg) |
 | :---: | :---: | :---: |
 | ![RAW](Samples/RAW.jpeg) | ![V-Log](Samples/V-Log.jpeg) | ![Class-Neg](Samples/FujiFilm%20Class-Neg.jpeg) |
 
-#### 精度验证
+#### ✅ 精度验证
 
 与松下 Lumix 实时 LUT (Real-time LUT) 的对比。
 
@@ -50,11 +59,7 @@
 | :---: | :---: |
 | ![机内直出](Samples/P1013122.jpg) | ![Raw Alchemy](Samples/Converted.jpg) |
 
-### 相关资源
-
--   **[V-Log Alchemy](https://gitee.com/MinQ/V-Log-Alchemy)**: 一系列专门为 V-Log 色彩空间设计的 `.cube` LUT 文件集合。这些 LUT 可以直接在 Raw Alchemy 中应用，为您的工作流程实现各种创意风格。
-
-### 快速入门 (推荐)
+## 🚀 快速入门 (推荐)
 
 对于大多数用户，使用 Raw Alchemy 最简单的方式是下载为您操作系统预编译的可执行文件。这无需安装 Python 或任何依赖。
 
@@ -62,13 +67,13 @@
 2.  下载适用于您系统的最新可执行文件 (例如 `RawAlchemy-vX.Y.Z-windows.exe` 或 `RawAlchemy-vX.Y.Z-linux`)。
 3.  运行工具。详情请参阅 [使用方法](#使用方法) 部分。
 
-### 从源码安装 (开发者选项)
+## 💻 从源码安装 (开发者选项)
 
 如果您希望从源码安装本项目，可以按照以下步骤操作：
 
 ```bash
 # 克隆本仓库
-git clone https://gitee.com/MinQ/Raw-Alchemy.git
+git clone https://github.com/shenmintao/raw-alchemy.git
 cd raw-alchemy
 
 # 安装工具及其依赖
@@ -77,14 +82,14 @@ pip install .
 
 *注意：本项目依赖特定版本的 `rawpy` 和 `colour-science`。*
 
-### 使用方法
+## 🛠️ 使用方法
 
 可执行文件同时提供了图形用户界面 (GUI) 和命令行界面 (CLI)。
 
 *   **启动 GUI**: 直接运行可执行文件，不带任何参数。详情请参阅下面的教程。
 *   **使用 CLI**: 带命令行参数运行可执行文件。
 
-### GUI 教程
+## 🖥️ GUI 教程
 
 图形界面提供了一种直观的方式来处理您的图像。
 
@@ -126,11 +131,11 @@ pip install .
 *   底部的 **Log** (日志) 窗口将实时显示转换的进度和状态。
 *   处理完成后，日志中会出现 "processing complete" (处理完成) 的消息。
 
-### 高级用法：导入 Adobe 镜头配置文件 (LCP)
+## 🔧 高级用法：导入 Adobe 镜头配置文件 (LCP)
 
 Raw Alchemy 现在包含一个强大的脚本，用于转换和导入 Adobe LCP 格式的镜头配置文件。LCP 格式被 Adobe Camera Raw 和 DNG Converter 使用，这意味着您可以访问一个更庞大、更及时的镜头数据库。
 
-用于转换的脚本 lensfun-convert-lcp-new 可在 [**Lensfun**](https://gitee.com/MinQ/lensfun) 中找到。
+用于转换的脚本 lensfun-convert-lcp-new 可在 [**Lensfun**](https://gitee.com/MinQ/lensfun/tree/master/apps) 中找到。
 
 **步骤：**
 
@@ -147,7 +152,7 @@ Raw Alchemy 现在包含一个强大的脚本，用于转换和导入 Adobe LCP 
     转换脚本会保存到默认位置，但您也可以使用其 `--output` 参数将 `.xml` 文件保存到任何您喜欢的地方。更多详情，请使用 `--help` 参数运行该脚本。
 
 
-### CLI 用法
+## ⌨️ CLI 用法
 
 **注意**: 在 Linux 上，您可能需要先为文件授予执行权限 (例如 `chmod +x ./RawAlchemy-v0.1.0-linux`)。
 
@@ -202,7 +207,7 @@ raw-alchemy [OPTIONS] <INPUT_RAW_PATH> <OUTPUT_TIFF_PATH>
 ./RawAlchemy-linux "input.ARW" "output.tiff" --log-space "S-Log3" --custom-lensfun-db "path/to/your/_lcps.xml"
 ```
 
-### 命令行选项
+## ⚙️ 命令行选项
 
 -   `<INPUT_RAW_PATH>`: (必需) 输入的 RAW 文件路径 (例如 .CR3, .ARW, .NEF)。
 -   `<OUTPUT_TIFF_PATH>`: (必需) 输出的 16 位 TIFF 文件的保存路径。
@@ -214,7 +219,7 @@ raw-alchemy [OPTIONS] <INPUT_RAW_PATH> <OUTPUT_TIFF_PATH>
 -   `--custom-lensfun-db TEXT`: (可选) 自定义 Lensfun 数据库 XML 文件的路径 (例如从 LCP 文件生成的)。
 -   `--metering TEXT`: (可选, 默认: `hybrid`) 自动曝光测光模式: `average` (平均), `center-weighted` (中央重点), `highlight-safe` (高光保护), 或 `hybrid` (混合)。
 
-### 支持的 Log 空间
+## 📋 支持的 Log 空间
 
 `--log-space` 选项支持以下值:
 -   `F-Log`
@@ -229,3 +234,4 @@ raw-alchemy [OPTIONS] <INPUT_RAW_PATH> <OUTPUT_TIFF_PATH>
 -   `Arri LogC3`
 -   `Arri LogC4`
 -   `Log3G10`
+-   `D-Log`
