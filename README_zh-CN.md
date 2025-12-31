@@ -9,7 +9,7 @@
 ## 🔗 相关项目
 
 ### V-Log Alchemy
-**[V-Log Alchemy](https://github.com/shenmintao/V-Log-Alchemy)** - 一系列专门为 V-Log 色彩空间设计的 `.cube` LUT 文件集合。
+**[V-Log Alchemy](https://gitee.com/MinQ/V-Log-Alchemy)** - 一系列专门为 V-Log 色彩空间设计的 `.cube` LUT 文件集合。
 
 这些专业级 LUT（包括富士胶片模拟、徕卡风格、ARRI 色彩科学等）可以直接在 Raw Alchemy 中应用，为您的工作流程实现各种创意风格。非常适合希望将电影级调色带入 RAW 图像的摄影师。
 
